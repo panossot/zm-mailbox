@@ -3,16 +3,22 @@ package com.zimbra.qa.unittest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.Sets;
 import com.zimbra.common.account.Key.CacheEntryBy;
 import com.zimbra.common.localconfig.LC;
 import com.zimbra.common.localconfig.LocalConfig;
 import com.zimbra.common.util.Log;
 import com.zimbra.cs.account.Account;
 import com.zimbra.cs.account.Provisioning.CacheEntry;
+import com.zimbra.cs.imap.ImapHandler;
 import com.zimbra.cs.imap.ImapProxy.ZimbraClientAuthenticator;
 import com.zimbra.cs.mailclient.CommandFailedException;
 import com.zimbra.cs.mailclient.auth.AuthenticatorFactory;
@@ -217,6 +223,22 @@ public class TestImapViaImapDaemon extends SharedImapTests {
             fail("should not be able to run X-ZIMBRA-FLUSHCACHE command with a non-admin auth token");
         } catch (CommandFailedException cfe) {
             assertEquals("must be authenticated as admin with X-ZIMBRA auth mechanism", cfe.getError());
+        }
+    }
+
+    @Test
+    public void testFlushNonImapCacheTypes() throws Exception {
+        //Flushing these cache types won't do anything on the imapd server, but
+        //we want to make sure that this does not fail;
+        ImapConnection adminConn = getAdminConnection();
+        Set<CacheEntryType> allTypes = new HashSet<CacheEntryType>(Arrays.asList(CacheEntryType.values()));
+        Set<CacheEntryType> nonImapTypes = Sets.difference(allTypes, ImapHandler.IMAP_CACHE_TYPES);
+        for (CacheEntryType type: nonImapTypes) {
+            try {
+                adminConn.flushCache(CacheEntryType.license.toString());
+            } catch (CommandFailedException e) {
+                fail("should be able issue X-ZIMBRA-FLUSHCACHE command for cache type " + type.toString());
+            }
         }
     }
 }
