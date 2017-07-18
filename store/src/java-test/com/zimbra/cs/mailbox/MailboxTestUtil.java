@@ -103,16 +103,17 @@ public final class MailboxTestUtil {
     }
 
     public static String getZimbraServerDir(String zimbraServerDir) {
-        if (StringUtil.isNullOrEmpty(zimbraServerDir)) {
-            zimbraServerDir = Strings.nullToEmpty(System.getProperty("server.dir"));
-            if (zimbraServerDir.isEmpty()) {
-                zimbraServerDir = Strings.nullToEmpty(System.getProperty("user.dir"));
+        String serverDir = zimbraServerDir;
+        if (StringUtil.isNullOrEmpty(serverDir)) {
+            serverDir = Strings.nullToEmpty(System.getProperty("server.dir"));
+            if (serverDir.isEmpty()) {
+                serverDir = Strings.nullToEmpty(System.getProperty("user.dir"));
             }
         }
-        if (!zimbraServerDir.endsWith("/")) {
-            zimbraServerDir = zimbraServerDir + "/";
+        if (!serverDir.endsWith("/")) {
+            serverDir = serverDir + "/";
         }
-        return zimbraServerDir;
+        return serverDir;
     }
 
     /**
